@@ -1,0 +1,25 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+# Refer to https://www.python.org/dev/peps/pep-0440/#version-specifiers for python
+# package version specifiers.
+[dev-packages]
+build = "*"
+black = "~= 22.1"
+pipenv-setup = "*"
+twine = "*"
+wheel = "*"
+
+[packages]
+# Always install the latest pip. In most cases it helps resovle issues
+# installing other packages.
+pip = "*"
+
+click = "~= 8.0"
+jmespath = "~= 1.0"
+requests = "~= 2.27"
+
+[requires]
+python_version = "3.7"
