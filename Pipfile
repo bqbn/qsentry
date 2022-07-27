@@ -17,9 +17,10 @@ wheel = "*"
 # installing other packages.
 pip = "*"
 
-click = "~= 8.0"
+click = "~= 8.1"
 jmespath = "~= 1.0"
 requests = "~= 2.27"
 
-[requires]
-python_version = "3.7"
+# Do not put python_version in this file as pipenv doesn't intend to support
+# multiple python versions anyways (https://github.com/pypa/pipenv/issues/1050).
+# We should probably use setup.py or pyproject.toml to do that.
