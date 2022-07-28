@@ -1,7 +1,10 @@
 import jmespath
+import logging
 import pprint
 
 from .api import SentryApi
+
+logger = logging.getLogger(__name__)
 
 
 def multiselect_hash_string(attributes):
@@ -32,7 +35,7 @@ class MembersCommand(Command):
         if kwargs["team"]:
             self.handle_the_team_option(kwargs["team"], kwargs["role"])
         elif kwargs["all"]:
-            if kwargs["attrs"]:
+            if kwargs.get("attrs"):
                 self.handle_the_list_all_option(attrs=kwargs["attrs"])
             else:
                 self.handle_the_list_all_option(attrs=["id", "email"])
@@ -70,9 +73,9 @@ class OrgsCommand(Command):
         self.call_api_and_print_attrs(
             "org_users_api", f"[].{ multiselect_hash_string(attrs) }"
         )
-        print(
-            "Warning: this command may not list all users for the org_users "
-            "api does not paginate. Use the members command instead for full "
+        logger.warn(
+            "Warning: This command may not list all users because the org_users "
+            "api does not paginate. Use the get members command instead for full "
             "list of members."
         )
 

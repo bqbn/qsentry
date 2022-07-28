@@ -14,24 +14,25 @@ Options:
   --help  Show this message and exit.
 
 Commands:
-  members   Member related commands
-  orgs      Organization related commands
-  projects  Project related commands
-  teams     Team related commands
+  get     Display resources such as members, teams, organizations and etc.
+  update  Update a resource such as a client key
 ```
 
-Member commands
+Get command
 
 ```
 $ qsentry members --help
-Usage: qsentry members [OPTIONS] COMMAND [ARGS]...
+Usage: qsentry get [OPTIONS] COMMAND [ARGS]...
 
-  Member related commands
+  Display resources such as members, teams, organizations and etc.
 
 Options:
   --help  Show this message and exit.
 
 Commands:
-  list       List members
-  search-by  Search a member by a term.
+  client-keys  Get all client keys of the given project.
+  members      Get the members
+  projects     Get the projects
+  teams        Get the teams
+  users        Get all users of the given organization.
 ```
