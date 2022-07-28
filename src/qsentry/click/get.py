@@ -23,14 +23,6 @@ def get(*args, **kwargs):
 @get.command()
 @add_common_options(common_options)
 @click.option(
-    "--all",
-    is_flag=True,
-    default=True,
-    help="""Get all members of an organization. It shows the member's id and
-            email by default. Use the --attrs option to change what attributes
-            to show.""",
-)
-@click.option(
     "--team",
     help="""Show the members of a given team. Should be used with --role option
             to filter by roles.""",
