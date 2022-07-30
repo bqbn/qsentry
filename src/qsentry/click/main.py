@@ -1,5 +1,7 @@
 import click
 
+from .utils import comma_separated_string_to_array
+
 
 def add_shared_options(options):
     def _add_shared_options(func):
@@ -8,14 +10,6 @@ def add_shared_options(options):
         return func
 
     return _add_shared_options
-
-
-def comma_separated_string_to_array(ctx, param, value):
-    """Split a non empty string and return the result list
-
-    Or return an empty list if the value is empty string.
-    """
-    return value.split(",") if value else []
 
 
 # The shared_options idea is borrowed from https://github.com/pallets/click/issues/108
