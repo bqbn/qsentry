@@ -59,6 +59,6 @@ shared_options = [
 ]
 
 
-@click.group(invoke_without_command=True)
-def main(*args, **kwargs):
+@click.group()
+def main():
     pass

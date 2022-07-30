@@ -9,8 +9,8 @@ from .main import (
 from ..commands import ProjectsCommand
 
 
-@main.group(invoke_without_command=True)
-def update(*args, **kwargs):
+@main.group()
+def update():
     """Update a resource such as a client key"""
     pass
 

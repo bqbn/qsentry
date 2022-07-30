@@ -14,8 +14,8 @@ from ..commands import (
 )
 
 
-@main.group(invoke_without_command=True)
-def get(*args, **kwargs):
+@main.group()
+def get():
     """Display resources such as members, teams, organizations and etc."""
     pass
 
