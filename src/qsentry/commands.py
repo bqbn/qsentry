@@ -34,7 +34,7 @@ class MembersCommand(Command):
     def list_command(self, **kwargs):
         if kwargs["team"]:
             self.handle_the_team_option(kwargs["team"], kwargs["role"])
-        elif kwargs["all"]:
+        else:
             if kwargs.get("attrs"):
                 self.handle_the_list_all_option(attrs=kwargs["attrs"])
             else:
