@@ -1,13 +1,13 @@
 import click
 
 
-def add_common_options(options):
-    def _add_common_options(func):
+def add_shared_options(options):
+    def _add_shared_options(func):
         for option in reversed(options):
             func = option(func)
         return func
 
-    return _add_common_options
+    return _add_shared_options
 
 
 def comma_separated_string_to_array(ctx, param, value):
@@ -18,8 +18,8 @@ def comma_separated_string_to_array(ctx, param, value):
     return value.split(",") if value else []
 
 
-# The common_options idea is borrowed from https://github.com/pallets/click/issues/108
-common_options = [
+# The shared_options idea is borrowed from https://github.com/pallets/click/issues/108
+shared_options = [
     click.option(
         "--attrs",
         default="",

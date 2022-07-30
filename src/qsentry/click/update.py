@@ -2,8 +2,8 @@ import click
 
 
 from .main import (
-    add_common_options,
-    common_options,
+    add_shared_options,
+    shared_options,
     main,
 )
 from ..commands import ProjectsCommand
@@ -16,7 +16,7 @@ def update(*args, **kwargs):
 
 
 @update.command()
-@add_common_options(common_options)
+@add_shared_options(shared_options)
 @click.option(
     "--project",
     required=True,

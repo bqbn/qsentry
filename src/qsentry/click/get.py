@@ -2,8 +2,8 @@ import click
 
 
 from .main import (
-    add_common_options,
-    common_options,
+    add_shared_options,
+    shared_options,
     main,
 )
 from ..commands import (
@@ -21,7 +21,7 @@ def get(*args, **kwargs):
 
 
 @get.command()
-@add_common_options(common_options)
+@add_shared_options(shared_options)
 @click.option(
     "--team",
     help="""Show the members of a given team. Should be used with --role option
@@ -36,11 +36,10 @@ def get(*args, **kwargs):
 
     The term should be in "<attribute>=<value>" form, for example "id=1234" or
     "email=foo@example.com", etc.
-    """
+    """,
 )
 def members(**kwargs):
-    """Get the members
-    """
+    """Get the members"""
     if kwargs.get("search_by"):
         MembersCommand(**kwargs).search_by(kwargs["search_by"])
     else:
@@ -48,7 +47,7 @@ def members(**kwargs):
 
 
 @get.command()
-@add_common_options(common_options)
+@add_shared_options(shared_options)
 def teams(**kwargs):
     """Get the teams
 
@@ -60,7 +59,7 @@ def teams(**kwargs):
 
 
 @get.command()
-@add_common_options(common_options)
+@add_shared_options(shared_options)
 @click.option(
     "--team",
     help="""Get the projects of the given team""",
@@ -79,7 +78,7 @@ def projects(**kwargs):
 
 
 @get.command()
-@add_common_options(common_options)
+@add_shared_options(shared_options)
 def users(**kwargs):
     """Get all users of the given organization.
 
@@ -91,7 +90,7 @@ def users(**kwargs):
 
 
 @get.command()
-@add_common_options(common_options)
+@add_shared_options(shared_options)
 @click.option(
     "--project",
     required=True,
@@ -105,5 +104,3 @@ def client_keys(**kwargs):
     """
     attrs = kwargs["attrs"] if kwargs.get("attrs") else ["id", "dsn", "rateLimit"]
     ProjectsCommand(**kwargs).list_keys(kwargs["project"], attrs)
-
-
