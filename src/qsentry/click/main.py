@@ -1,6 +1,7 @@
 import click
 
 from .utils import comma_separated_string_to_array
+from .. import __version__
 
 
 def add_shared_options(options):
@@ -54,5 +55,6 @@ shared_options = [
 
 
 @click.group()
+@click.version_option(version=__version__)
 def main():
     pass
