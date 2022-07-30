@@ -19,6 +19,7 @@ pip = "*"
 
 click = "~= 8.1"
 jmespath = "~= 1.0"
+python-dotenv = "~= 0.20"
 requests = "~= 2.27"
 
 # Do not put python_version in this file as pipenv doesn't intend to support
