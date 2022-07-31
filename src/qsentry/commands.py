@@ -1,6 +1,6 @@
+import json
 import jmespath
 import logging
-import pprint
 
 from .api import SentryApi
 
@@ -47,7 +47,7 @@ class MembersCommand(Command):
         ).org_members_api():
             for member in page:
                 if member.get(key) == value:
-                    pprint.pprint(member)
+                    print(json.dumps(member, indent=4))
                     return None
 
     def handle_the_list_all_option(self, attrs):
