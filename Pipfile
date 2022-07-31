@@ -7,7 +7,7 @@ verify_ssl = true
 # package version specifiers.
 [dev-packages]
 build = "*"
-black = "~= 22.1"
+black = "*"
 pipenv-setup = "*"
 twine = "*"
 wheel = "*"
