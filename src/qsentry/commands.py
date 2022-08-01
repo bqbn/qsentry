@@ -36,8 +36,29 @@ class Command:
             print(json.dumps(random.choice(page), indent=4))
             return None
 
+    def search_by(self, search_by_term, *args, **kwargs):
+        sentry = SentryApi(self.host_url, self.org_slug, self.auth_token)
+        search_key, search_val = search_by_term.split("=")
+
+        items = []
+        for page in getattr(sentry, self.search_by_api)(*args, **kwargs):
+            for item in page:
+                value = item.get(search_key)
+                if type(value) == bool:
+                    if bool(search_val) == value:
+                        items.append(item)
+                else:
+                    if search_val == value:
+                        items.append(item)
+
+        print(json.dumps(items, indent=4))
+
 
 class MembersCommand(Command):
+    def __init__(self, **kwargs):
+        self.search_by_api = "org_members_api"
+        super().__init__(**kwargs)
+
     def list_command(self, **kwargs):
         if kwargs["team"]:
             self.handle_the_team_option(kwargs["team"], kwargs["role"])
@@ -46,16 +67,6 @@ class MembersCommand(Command):
                 self.handle_the_list_all_option(attrs=kwargs["attrs"])
             else:
                 self.handle_the_list_all_option(attrs=["id", "email"])
-
-    def search_by(self, search_by_term):
-        key, value = search_by_term.split("=")
-        for page in SentryApi(
-            self.host_url, self.org_slug, self.auth_token
-        ).org_members_api():
-            for member in page:
-                if member.get(key) == value:
-                    print(json.dumps(member, indent=4))
-                    return None
 
     def handle_the_list_all_option(self, attrs):
         self.call_api_and_print_attrs(
@@ -97,6 +108,10 @@ class OrgsCommand(Command):
 
 
 class TeamsCommand(Command):
+    def __init__(self, **kwargs):
+        self.search_by_api = "org_teams_api"
+        super().__init__(**kwargs)
+
     def list_command(self, attrs):
         self.call_api_and_print_attrs(
             "org_teams_api", f"[].{ multiselect_hash_string(attrs) }"
@@ -115,6 +130,10 @@ class TeamsCommand(Command):
 
 
 class ProjectsCommand(Command):
+    def __init__(self, **kwargs):
+        self.search_by_api = "org_projects_api"
+        super().__init__(**kwargs)
+
     def list_keys(self, project_slug, attrs):
         self.call_api_and_print_attrs(
             "project_keys_api", f"[].{ multiselect_hash_string(attrs) }", project_slug
@@ -128,3 +147,9 @@ class ProjectsCommand(Command):
             self.host_url, self.org_slug, self.auth_token
         ).update_project_client_key(project_slug, key_id, data):
             print(f"Key {key_id} successfully updated.")
+
+
+class UsersCommand(Command):
+    def __init__(self, **kwargs):
+        self.search_by_api = "org_users_api"
+        super().__init__(**kwargs)

@@ -12,6 +12,7 @@ from ..commands import (
     OrgsCommand,
     ProjectsCommand,
     TeamsCommand,
+    UsersCommand,
 )
 
 
@@ -21,6 +22,13 @@ shared_get_options = [
         is_flag=True,
         default=False,
         help="""Get one json formated example of the requested resource.""",
+    ),
+    click.option(
+        "--search-by",
+        help="""Search a resource by a term. The term should be in
+        "<attribute>=<value>" form, for example "id=1234" or
+        "email=foo@example.com", etc.
+        """,
     ),
 ]
 
@@ -40,14 +48,6 @@ def get():
 )
 @click.option(
     "--role", default="admin", show_default=True, help="The role of the member."
-)
-@click.option(
-    "--search-by",
-    help="""Search a member by a term.
-
-    The term should be in "<attribute>=<value>" form, for example "id=1234" or
-    "email=foo@example.com", etc.
-    """,
 )
 def members(**kwargs):
     """Get the members"""
@@ -71,6 +71,8 @@ def teams(**kwargs):
     attrs = kwargs["attrs"] if kwargs.get("attrs") else ["slug"]
     if kwargs.get("one"):
         TeamsCommand(**kwargs).handle_the_list_one_option(**kwargs)
+    elif kwargs.get("search_by"):
+        TeamsCommand(**kwargs).search_by(kwargs["search_by"])
     else:
         TeamsCommand(**kwargs).list_command(attrs)
 
@@ -97,6 +99,8 @@ def projects(**kwargs):
     else:
         if kwargs.get("one"):
             OrgsCommand(**kwargs).handle_list_one_project()
+        elif kwargs.get("search_by"):
+            ProjectsCommand(**kwargs).search_by(kwargs["search_by"])
         else:
             OrgsCommand(**kwargs).list_projects(attrs)
 
@@ -113,6 +117,8 @@ def users(**kwargs):
     attrs = kwargs["attrs"] if kwargs.get("attrs") else ["id", "email"]
     if kwargs.get("one"):
         OrgsCommand(**kwargs).handle_list_one_user()
+    elif kwargs.get("search_by"):
+        UsersCommand(**kwargs).search_by(kwargs["search_by"])
     else:
         OrgsCommand(**kwargs).list_users(attrs)
 
