@@ -84,29 +84,6 @@ class MembersCommand(Command):
         )
 
 
-class OrgsCommand(Command):
-    def list_projects(self, attrs):
-        self.call_api_and_print_attrs(
-            "org_projects_api", f"[].{ multiselect_hash_string(attrs) }"
-        )
-
-    def list_users(self, attrs):
-        self.call_api_and_print_attrs(
-            "org_users_api", f"[].{ multiselect_hash_string(attrs) }"
-        )
-        logger.warn(
-            "Warning: This command may not list all users because the org_users "
-            "api does not paginate. Use the get members command instead for full "
-            "list of members."
-        )
-
-    def handle_list_one_project(self):
-        self.call_api_and_print_one("org_projects_api")
-
-    def handle_list_one_user(self):
-        self.call_api_and_print_one("org_users_api")
-
-
 class TeamsCommand(Command):
     def __init__(self, **kwargs):
         self.search_by_api = "org_teams_api"
@@ -134,6 +111,14 @@ class ProjectsCommand(Command):
         self.search_by_api = "org_projects_api"
         super().__init__(**kwargs)
 
+    def list_projects(self, attrs):
+        self.call_api_and_print_attrs(
+            "org_projects_api", f"[].{ multiselect_hash_string(attrs) }"
+        )
+
+    def list_one_project(self):
+        self.call_api_and_print_one("org_projects_api")
+
     def list_keys(self, project_slug, attrs):
         self.call_api_and_print_attrs(
             "project_keys_api", f"[].{ multiselect_hash_string(attrs) }", project_slug
@@ -153,3 +138,16 @@ class UsersCommand(Command):
     def __init__(self, **kwargs):
         self.search_by_api = "org_users_api"
         super().__init__(**kwargs)
+
+    def list_users(self, attrs):
+        self.call_api_and_print_attrs(
+            "org_users_api", f"[].{ multiselect_hash_string(attrs) }"
+        )
+        logger.warn(
+            "Warning: This command may not list all users because the org_users "
+            "api does not paginate. Use the get members command instead for full "
+            "list of members."
+        )
+
+    def list_one_user(self):
+        self.call_api_and_print_one("org_users_api")

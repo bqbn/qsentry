@@ -9,7 +9,6 @@ from .main import (
 from .utils import add_shared_options
 from ..commands import (
     MembersCommand,
-    OrgsCommand,
     ProjectsCommand,
     TeamsCommand,
     UsersCommand,
@@ -98,11 +97,11 @@ def projects(**kwargs):
             TeamsCommand(**kwargs).list_projects(kwargs["team"], attrs)
     else:
         if kwargs.get("one"):
-            OrgsCommand(**kwargs).handle_list_one_project()
+            ProjectsCommand(**kwargs).list_one_project()
         elif kwargs.get("search_by"):
             ProjectsCommand(**kwargs).search_by(kwargs["search_by"])
         else:
-            OrgsCommand(**kwargs).list_projects(attrs)
+            ProjectsCommand(**kwargs).list_projects(attrs)
 
 
 @get.command()
@@ -116,11 +115,11 @@ def users(**kwargs):
     """
     attrs = kwargs["attrs"] if kwargs.get("attrs") else ["id", "email"]
     if kwargs.get("one"):
-        OrgsCommand(**kwargs).handle_list_one_user()
+        UsersCommand(**kwargs).list_one_user()
     elif kwargs.get("search_by"):
         UsersCommand(**kwargs).search_by(kwargs["search_by"])
     else:
-        OrgsCommand(**kwargs).list_users(attrs)
+        UsersCommand(**kwargs).list_users(attrs)
 
 
 @get.command()
