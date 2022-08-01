@@ -1,16 +1,7 @@
 import click
 
-from .utils import comma_separated_string_to_array
+from .utils import add_shared_options, comma_separated_string_to_array
 from .. import __version__
-
-
-def add_shared_options(options):
-    def _add_shared_options(func):
-        for option in reversed(options):
-            func = option(func)
-        return func
-
-    return _add_shared_options
 
 
 # The shared_options idea is borrowed from https://github.com/pallets/click/issues/108

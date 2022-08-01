@@ -6,6 +6,7 @@ from .main import (
     shared_options,
     main,
 )
+from .utils import add_shared_options
 from ..commands import (
     MembersCommand,
     OrgsCommand,
@@ -13,6 +14,15 @@ from ..commands import (
     TeamsCommand,
 )
 
+
+shared_get_options = [
+    click.option(
+        "--one",
+        is_flag=True,
+        default=False,
+        help="""Get one json formated example of the requested resource.""",
+    ),
+]
 
 @main.group()
 def get():
@@ -22,6 +32,7 @@ def get():
 
 @get.command()
 @add_shared_options(shared_options)
+@add_shared_options(shared_get_options)
 @click.option(
     "--team",
     help="""Show the members of a given team. Should be used with --role option
@@ -40,7 +51,9 @@ def get():
 )
 def members(**kwargs):
     """Get the members"""
-    if kwargs.get("search_by"):
+    if kwargs.get("one"):
+        MembersCommand(**kwargs).handle_the_list_one_option(**kwargs)
+    elif kwargs.get("search_by"):
         MembersCommand(**kwargs).search_by(kwargs["search_by"])
     else:
         MembersCommand(**kwargs).list_command(**kwargs)
@@ -48,6 +61,7 @@ def members(**kwargs):
 
 @get.command()
 @add_shared_options(shared_options)
+@add_shared_options(shared_get_options)
 def teams(**kwargs):
     """Get the teams
 
@@ -55,11 +69,15 @@ def teams(**kwargs):
     attributes to show.
     """
     attrs = kwargs["attrs"] if kwargs.get("attrs") else ["slug"]
-    TeamsCommand(**kwargs).list_command(attrs)
+    if kwargs.get("one"):
+        TeamsCommand(**kwargs).handle_the_list_one_option(**kwargs)
+    else:
+        TeamsCommand(**kwargs).list_command(attrs)
 
 
 @get.command()
 @add_shared_options(shared_options)
+@add_shared_options(shared_get_options)
 @click.option(
     "--team",
     help="""Get the projects of the given team""",
@@ -72,13 +90,20 @@ def projects(**kwargs):
     """
     attrs = kwargs["attrs"] if kwargs.get("attrs") else ["id", "name", "slug"]
     if kwargs.get("team"):
-        TeamsCommand(**kwargs).list_projects(kwargs["team"], attrs)
+        if kwargs.get("one"):
+            TeamsCommand(**kwargs).handle_list_one_project(kwargs["team"])
+        else:
+            TeamsCommand(**kwargs).list_projects(kwargs["team"], attrs)
     else:
-        OrgsCommand(**kwargs).list_projects(attrs)
+        if kwargs.get("one"):
+            OrgsCommand(**kwargs).handle_list_one_project()
+        else:
+            OrgsCommand(**kwargs).list_projects(attrs)
 
 
 @get.command()
 @add_shared_options(shared_options)
+@add_shared_options(shared_get_options)
 def users(**kwargs):
     """Get all users of the given organization.
 
@@ -86,11 +111,15 @@ def users(**kwargs):
     what attributes to show.
     """
     attrs = kwargs["attrs"] if kwargs.get("attrs") else ["id", "email"]
-    OrgsCommand(**kwargs).list_users(attrs)
+    if kwargs.get("one"):
+        OrgsCommand(**kwargs).handle_list_one_user()
+    else:
+        OrgsCommand(**kwargs).list_users(attrs)
 
 
 @get.command()
 @add_shared_options(shared_options)
+@add_shared_options(shared_get_options)
 @click.option(
     "--project",
     required=True,
@@ -103,4 +132,7 @@ def client_keys(**kwargs):
     change what attributes to show.
     """
     attrs = kwargs["attrs"] if kwargs.get("attrs") else ["id", "dsn", "rateLimit"]
-    ProjectsCommand(**kwargs).list_keys(kwargs["project"], attrs)
+    if kwargs.get("one"):
+        ProjectsCommand(**kwargs).handle_list_one_key(kwargs["project"])
+    else:
+        ProjectsCommand(**kwargs).list_keys(kwargs["project"], attrs)

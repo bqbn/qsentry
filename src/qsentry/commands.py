@@ -1,6 +1,7 @@
 import json
 import jmespath
 import logging
+import random
 
 from .api import SentryApi
 
@@ -29,6 +30,12 @@ class Command:
         if self.print_count:
             print(f"Count: {self.count}")
 
+    def call_api_and_print_one(self, api, *args, **kwargs):
+        sentry = SentryApi(self.host_url, self.org_slug, self.auth_token)
+        for page in getattr(sentry, api)(*args, **kwargs):
+            print(json.dumps(random.choice(page), indent=4))
+            return None
+
 
 class MembersCommand(Command):
     def list_command(self, **kwargs):
@@ -55,6 +62,9 @@ class MembersCommand(Command):
             "org_members_api", f"[].{ multiselect_hash_string(attrs) }"
         )
 
+    def handle_the_list_one_option(self, **kwargs):
+        self.call_api_and_print_one("org_members_api")
+
     def handle_the_team_option(self, team_slug, role):
         self.call_api_and_print_attrs(
             "team_members_api",
@@ -79,6 +89,12 @@ class OrgsCommand(Command):
             "list of members."
         )
 
+    def handle_list_one_project(self):
+        self.call_api_and_print_one("org_projects_api")
+
+    def handle_list_one_user(self):
+        self.call_api_and_print_one("org_users_api")
+
 
 class TeamsCommand(Command):
     def list_command(self, attrs):
@@ -91,12 +107,21 @@ class TeamsCommand(Command):
             "team_projects_api", f"[].{ multiselect_hash_string(attrs) }", team_slug
         )
 
+    def handle_the_list_one_option(self, **kwargs):
+        self.call_api_and_print_one("org_teams_api")
+
+    def handle_list_one_project(self, team_slug):
+        self.call_api_and_print_one("team_projects_api", team_slug)
+
 
 class ProjectsCommand(Command):
     def list_keys(self, project_slug, attrs):
         self.call_api_and_print_attrs(
             "project_keys_api", f"[].{ multiselect_hash_string(attrs) }", project_slug
         )
+
+    def handle_list_one_key(self, project_slug):
+        self.call_api_and_print_one("project_keys_api", project_slug)
 
     def update_key(self, project_slug, key_id, data):
         if SentryApi(
