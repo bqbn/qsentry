@@ -8,6 +8,7 @@ from .main import (
 )
 from .utils import add_shared_options
 from ..commands import (
+    ClientKeysCommand,
     MembersCommand,
     ProjectsCommand,
     TeamsCommand,
@@ -31,6 +32,7 @@ shared_get_options = [
     ),
 ]
 
+
 @main.group()
 def get():
     """Display resources such as members, teams, organizations and etc."""
@@ -50,12 +52,18 @@ def get():
 )
 def members(**kwargs):
     """Get the members"""
+    attrs = kwargs["attrs"] if kwargs.get("attrs") else ["id", "email"]
     if kwargs.get("one"):
-        MembersCommand(**kwargs).handle_the_list_one_option(**kwargs)
+        MembersCommand(**kwargs).get_and_print_one()
     elif kwargs.get("search_by"):
         MembersCommand(**kwargs).search_by(kwargs["search_by"])
     else:
-        MembersCommand(**kwargs).list_command(**kwargs)
+        if kwargs.get("team"):
+            MembersCommand(**kwargs).get_and_print_all_by_team(
+                attrs, kwargs.get("team"), kwargs.get("role")
+            )
+        else:
+            MembersCommand(**kwargs).get_and_print_all(attrs)
 
 
 @get.command()
@@ -69,11 +77,11 @@ def teams(**kwargs):
     """
     attrs = kwargs["attrs"] if kwargs.get("attrs") else ["slug"]
     if kwargs.get("one"):
-        TeamsCommand(**kwargs).handle_the_list_one_option(**kwargs)
+        TeamsCommand(**kwargs).get_and_print_one()
     elif kwargs.get("search_by"):
         TeamsCommand(**kwargs).search_by(kwargs["search_by"])
     else:
-        TeamsCommand(**kwargs).list_command(attrs)
+        TeamsCommand(**kwargs).get_and_print_all(attrs)
 
 
 @get.command()
@@ -92,16 +100,16 @@ def projects(**kwargs):
     attrs = kwargs["attrs"] if kwargs.get("attrs") else ["id", "name", "slug"]
     if kwargs.get("team"):
         if kwargs.get("one"):
-            TeamsCommand(**kwargs).handle_list_one_project(kwargs["team"])
+            ProjectsCommand(**kwargs).get_and_print_one_by_team(kwargs["team"])
         else:
-            TeamsCommand(**kwargs).list_projects(kwargs["team"], attrs)
+            ProjectsCommand(**kwargs).get_and_print_all_by_team(attrs, kwargs["team"])
     else:
         if kwargs.get("one"):
-            ProjectsCommand(**kwargs).list_one_project()
+            ProjectsCommand(**kwargs).get_and_print_one()
         elif kwargs.get("search_by"):
             ProjectsCommand(**kwargs).search_by(kwargs["search_by"])
         else:
-            ProjectsCommand(**kwargs).list_projects(attrs)
+            ProjectsCommand(**kwargs).get_and_print_all(attrs)
 
 
 @get.command()
@@ -115,11 +123,11 @@ def users(**kwargs):
     """
     attrs = kwargs["attrs"] if kwargs.get("attrs") else ["id", "email"]
     if kwargs.get("one"):
-        UsersCommand(**kwargs).list_one_user()
+        UsersCommand(**kwargs).get_and_print_one()
     elif kwargs.get("search_by"):
         UsersCommand(**kwargs).search_by(kwargs["search_by"])
     else:
-        UsersCommand(**kwargs).list_users(attrs)
+        UsersCommand(**kwargs).get_and_print_all(attrs)
 
 
 @get.command()
@@ -138,6 +146,6 @@ def client_keys(**kwargs):
     """
     attrs = kwargs["attrs"] if kwargs.get("attrs") else ["id", "dsn", "rateLimit"]
     if kwargs.get("one"):
-        ProjectsCommand(**kwargs).handle_list_one_key(kwargs["project"])
+        ClientKeysCommand(**kwargs).get_and_print_one(kwargs["project"])
     else:
-        ProjectsCommand(**kwargs).list_keys(kwargs["project"], attrs)
+        ClientKeysCommand(**kwargs).get_and_print_all(attrs, kwargs["project"])

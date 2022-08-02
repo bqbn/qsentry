@@ -21,21 +21,6 @@ class Command:
         self.print_count = kwargs.get("count")
         self.count = 0
 
-    def call_api_and_print_attrs(self, api, jmes_filter, *args, **kwargs):
-        sentry = SentryApi(self.host_url, self.org_slug, self.auth_token)
-        for page in getattr(sentry, api)(*args, **kwargs):
-            for item in jmespath.search(jmes_filter, page):
-                print(", ".join([str(val) for val in item.values()]))
-                self.count += 1
-        if self.print_count:
-            print(f"Count: {self.count}")
-
-    def call_api_and_print_one(self, api, *args, **kwargs):
-        sentry = SentryApi(self.host_url, self.org_slug, self.auth_token)
-        for page in getattr(sentry, api)(*args, **kwargs):
-            print(json.dumps(random.choice(page), indent=4))
-            return None
-
     def search_by(self, search_by_term, *args, **kwargs):
         sentry = SentryApi(self.host_url, self.org_slug, self.auth_token)
         search_key, search_val = search_by_term.split("=")
@@ -53,101 +38,95 @@ class Command:
 
         print(json.dumps(items, indent=4))
 
+    def get_and_print_all(self, attrs, *args, api=None, jmes_filter="", **kwargs):
+        sentry = SentryApi(self.host_url, self.org_slug, self.auth_token)
+
+        # By default the jmes filter is formed by using attrs. We allow the default
+        # filter to be overriden by the calling function.
+        if jmes_filter == "":
+            jmes_filter = f"[].{ multiselect_hash_string(attrs) }"
+
+        api = self.get_and_print_all_api if api is None else api
+
+        for page in getattr(sentry, api)(*args, **kwargs):
+            for item in jmespath.search(jmes_filter, page):
+                print(", ".join([str(val) for val in item.values()]))
+                self.count += 1
+        if self.print_count:
+            print(f"Count: {self.count}")
+
+    def get_and_print_one(self, *args, api=None, **kwargs):
+        sentry = SentryApi(self.host_url, self.org_slug, self.auth_token)
+
+        api = self.get_and_print_one_api if api is None else api
+        for page in getattr(sentry, api)(*args, **kwargs):
+            print(json.dumps(random.choice(page), indent=4))
+            return None
+
 
 class MembersCommand(Command):
     def __init__(self, **kwargs):
+        self.get_and_print_all_api = "org_members_api"
+        self.get_and_print_one_api = "org_members_api"
         self.search_by_api = "org_members_api"
         super().__init__(**kwargs)
 
-    def list_command(self, **kwargs):
-        if kwargs["team"]:
-            self.handle_the_team_option(kwargs["team"], kwargs["role"])
-        else:
-            if kwargs.get("attrs"):
-                self.handle_the_list_all_option(attrs=kwargs["attrs"])
-            else:
-                self.handle_the_list_all_option(attrs=["id", "email"])
-
-    def handle_the_list_all_option(self, attrs):
-        self.call_api_and_print_attrs(
-            "org_members_api", f"[].{ multiselect_hash_string(attrs) }"
-        )
-
-    def handle_the_list_one_option(self, **kwargs):
-        self.call_api_and_print_one("org_members_api")
-
-    def handle_the_team_option(self, team_slug, role):
-        self.call_api_and_print_attrs(
-            "team_members_api",
-            f"[?role == '{role}' && flags.\"sso:linked\"].{ multiselect_hash_string(['id', 'name', 'email']) }",
+    def get_and_print_all_by_team(self, attrs, team_slug, role):
+        self.get_and_print_all(
+            "",
             team_slug,
+            jmes_filter=f"[?role == '{role}' && flags.\"sso:linked\"].{ multiselect_hash_string(attrs) }",
+            api="team_members_api",
         )
 
 
 class TeamsCommand(Command):
     def __init__(self, **kwargs):
+        self.get_and_print_all_api = "org_teams_api"
+        self.get_and_print_one_api = "org_teams_api"
         self.search_by_api = "org_teams_api"
         super().__init__(**kwargs)
-
-    def list_command(self, attrs):
-        self.call_api_and_print_attrs(
-            "org_teams_api", f"[].{ multiselect_hash_string(attrs) }"
-        )
-
-    def list_projects(self, team_slug, attrs):
-        self.call_api_and_print_attrs(
-            "team_projects_api", f"[].{ multiselect_hash_string(attrs) }", team_slug
-        )
-
-    def handle_the_list_one_option(self, **kwargs):
-        self.call_api_and_print_one("org_teams_api")
-
-    def handle_list_one_project(self, team_slug):
-        self.call_api_and_print_one("team_projects_api", team_slug)
 
 
 class ProjectsCommand(Command):
     def __init__(self, **kwargs):
+        self.get_and_print_all_api = "org_projects_api"
+        self.get_and_print_one_api = "org_projects_api"
         self.search_by_api = "org_projects_api"
         super().__init__(**kwargs)
 
-    def list_projects(self, attrs):
-        self.call_api_and_print_attrs(
-            "org_projects_api", f"[].{ multiselect_hash_string(attrs) }"
-        )
+    def get_and_print_all_by_team(self, attrs, team_slug):
+        self.get_and_print_all(attrs, team_slug, api="team_projects_api")
 
-    def list_one_project(self):
-        self.call_api_and_print_one("org_projects_api")
-
-    def list_keys(self, project_slug, attrs):
-        self.call_api_and_print_attrs(
-            "project_keys_api", f"[].{ multiselect_hash_string(attrs) }", project_slug
-        )
-
-    def handle_list_one_key(self, project_slug):
-        self.call_api_and_print_one("project_keys_api", project_slug)
-
-    def update_key(self, project_slug, key_id, data):
-        if SentryApi(
-            self.host_url, self.org_slug, self.auth_token
-        ).update_project_client_key(project_slug, key_id, data):
-            print(f"Key {key_id} successfully updated.")
+    def get_and_print_one_by_team(self, team_slug):
+        self.get_and_print_one(team_slug, api="team_projects_api")
 
 
 class UsersCommand(Command):
     def __init__(self, **kwargs):
+        self.get_and_print_all_api = "org_users_api"
+        self.get_and_print_one_api = "org_users_api"
         self.search_by_api = "org_users_api"
         super().__init__(**kwargs)
 
-    def list_users(self, attrs):
-        self.call_api_and_print_attrs(
-            "org_users_api", f"[].{ multiselect_hash_string(attrs) }"
-        )
+    def get_and_print_all(self, attrs):
+        super().get_and_print_all(attrs)
         logger.warn(
             "Warning: This command may not list all users because the org_users "
             "api does not paginate. Use the get members command instead for full "
             "list of members."
         )
 
-    def list_one_user(self):
-        self.call_api_and_print_one("org_users_api")
+
+class ClientKeysCommand(Command):
+    def __init__(self, **kwargs):
+        self.get_and_print_all_api = "project_keys_api"
+        self.get_and_print_one_api = "project_keys_api"
+        self.search_by_api = "project_keys_api"
+        super().__init__(**kwargs)
+
+    def update_key(self, project_slug, key_id, data):
+        if SentryApi(
+            self.host_url, self.org_slug, self.auth_token
+        ).update_project_client_key(project_slug, key_id, data):
+            print(f"Key {key_id} successfully updated.")
