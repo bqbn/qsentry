@@ -35,6 +35,6 @@ def update():
 )
 def client_key(**kwargs):
     """Update a client key."""
-    ProjectsCommand(**kwargs).update_key(
+    ClientKeysCommand(**kwargs).update_key(
         kwargs["project"], kwargs["key_id"], kwargs["data"]
     )
